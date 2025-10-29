@@ -3,7 +3,7 @@ import urllib.parse
 from telegram import Update, ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
 
-WEB_URL = "https://string-session-web.up.railway.app"  # UPDATE AFTER WEB DEPLOY
+WEB_URL = "https://web-production-11880.up.railway.app"  # UPDATE AFTER WEB DEPLOY
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
