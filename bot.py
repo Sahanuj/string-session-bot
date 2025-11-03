@@ -47,12 +47,13 @@ async def handle_contact(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 def main():
     app = Application.builder().token(BOT_TOKEN).build()
+
+    # CORRECTLY ADD HANDLERS
     app.add_handler(CommandHandler("start", start))
     app.add_handler(MessageHandler(filters.CONTACT, handle_contact))
+
     print("Bot is running...")
     app.run_polling()
 
 if __name__ == "__main__":
-    main()mmandHandler("start", start))
-app.add_handler(MessageHandler(filters.CONTACT, phone))
-app.run_polling()
+    main()
